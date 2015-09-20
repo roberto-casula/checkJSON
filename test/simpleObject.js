@@ -1,13 +1,13 @@
-var chai = require( 'chai' );
+var chai = require('chai');
 var chaiAsPromised = require("chai-as-promised");
 var should = chai.should();
 
 chai.use(chaiAsPromised);
 
-var checkJS = require( '../' );
+var checkJS = require('../');
 
-describe( "simpleObject.js", function() {
-   var check = checkJS.with( {
+describe("simpleObject.js", function() {
+   var check = checkJS.with({
       "type": "Object",
       "schema": {
          "string": {
@@ -20,7 +20,7 @@ describe( "simpleObject.js", function() {
             "type": "Boolean"
          }
       }
-   } );
+   });
 
    var mainObject = {
       "string": "hello world",
@@ -43,57 +43,66 @@ describe( "simpleObject.js", function() {
       "string": "hello world",
       "boolean": "false"
    };
+   var missingError = {
+      "number": "should exists and be a valid Number"
+   };
    var invalidObject = {
       "string": "hello world",
       "number": "hello world",
       "boolean": "hello world"
    };
 
-   before( function( done ) {
+   before(function(done) {
       done();
-   } );
-   after( function( done ) {
+   });
+   after(function(done) {
       done();
-   } );
+   });
 
-   describe( 'validation', function() {
-      it( 'should validate a well formed object', function( done ) {
-         check( mainObject )
+   describe('validation', function() {
+      it('should validate a well formed object', function(done) {
+         check(mainObject)
             .should.be.fulfilled
             .notify(done);
-      } );
-      it( 'should validate an object with too many keys', function( done ) {
-         check( tooManyKeys )
+      });
+      it('should validate an object with too many keys', function(done) {
+         check(tooManyKeys)
             .should.be.fulfilled
             .notify(done);
-      } );
-      it( 'should reject an object with missingKey', function( done ) {
-         check( missingKey )
+      });
+      it('should reject an object with missingKey', function(done) {
+         check(missingKey)
             .should.be.rejected
             .notify(done);
-      } );
-      it( 'should reject an object that is not well formed', function( done ) {
-         check( invalidObject )
+      });
+      it('should reject an object that is not well formed', function(done) {
+         check(invalidObject)
             .should.be.rejected
             .notify(done);
-      } );
-   } );
+      });
+      it('should return the expected error', function(done) {
+         check(missingKey)
+            .then(function(result) {
+               should.not.exists(result);
+            })
+            .catch(function(error) {
+               error.should.be.deep.equal(missingError);
+            })
+            .finally( done );
+      });
+   });
 
-   describe( 'sanitization', function() {
-      it( 'should sanitize a well formed object', function( done ) {
-         check( mainObject )
-            .should.become( sanitizedObject )
+   describe('sanitization', function() {
+      it('should sanitize a well formed object', function(done) {
+         check(mainObject)
+            .should.become(sanitizedObject)
             .notify(done);
-      } );
-      it( 'should sanitize an object with too many keys', function( done ) {
-         check( tooManyKeys )
-            .should.become( sanitizedObject )
+      });
+      it('should sanitize an object with too many keys', function(done) {
+         check(tooManyKeys)
+            .should.become(sanitizedObject)
             .notify(done);
-      } );
-   } );
+      });
+   });
 
-   describe( 'should return the expected error', function( done ) {
-
-   } );
-
-} );
+});

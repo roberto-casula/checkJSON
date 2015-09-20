@@ -9,6 +9,7 @@ var prototype = {
 
    validate: function(value, schema) {
       var type = _.capitalize(schema.type);
+
       if (type === "String") {
          return _.isString(value);
       } else
@@ -35,7 +36,7 @@ var prototype = {
          throw new Error('"' + type + '" is not recognized by the sanitize function"');
       }
    },
-   testType: function testType(value, schema, prefix) {
+   testType: function testType(value, schema) {
       var deferred = Promise.defer();
 
       if (this.validate(value, schema)) {
@@ -47,68 +48,78 @@ var prototype = {
       return deferred.promise;
    },
 
-   testObject: function testObject(argument, schema, prefix) {
-      var deferred = Promise.defer(),
-         promises = [],
-             keys = [];
+   testObject: function testObject(argument, schema) {
+      var deferred = Promise.defer();
 
-      _.forOwn(schema, function(subSchema, key) {
-         var dotKey = prefix + '.' + key;
-         var value = argument[key];         
-         keys.push( key );
-         promises.push(this.testWithSchema(value, subSchema, dotKey));
-      }, this);
+      process.nextTick(function() {
+         var promises = [],
+            keys = [];
+         _.forOwn(schema, function(subSchema, key) {
+            var required, value;
+            required = subSchema.required !== false;
+            value = argument[key];
+            keys.push(key);
 
-      Promise.settle(promises).then(function(results) {
-         var reject = false,
-             object = {},
-             errors = {};
-
-         _.forEach( results, function( result, i ) {
-            var key = keys[i];
-
-            if( !reject && result.isFulfilled() ) {
-               object[ key ] = result.value();
+            if (!_.isUndefined(value)) {
+               promises.push(this.testWithSchema(value, subSchema));
             } else
-            if( result.isRejected() ) {
-               reject = true;
-               errors[ key ] = result.reason();
+            if (required && _.isUndefined(value)) {
+               promises.push(
+                  Promise.reject('should exists and be a valid ' + subSchema.type)
+               );
             }
-         } );
-         if( reject ) {
-            return deferred.reject( errors )
-         } else {
-            return deferred.resolve( object );
-         }
+         }, this);
 
-      });
+         Promise.settle(promises).then(function(results) {
+            var reject = false,
+               object = {},
+               errors = {};
+
+            _.forEach(results, function(result, i) {
+               var key = keys[i];
+
+               if (!reject && result.isFulfilled()) {
+                  object[key] = result.value();
+               } else
+               if (result.isRejected()) {
+                  reject = true;
+                  errors[key] = result.reason();
+               }
+            });
+            if (reject) {
+               return deferred.reject(errors)
+            } else {
+               return deferred.resolve(object);
+            }
+         });
+
+      }.bind(this));
 
       return deferred.promise;
    },
 
-   testWithSchema: function testWithSchema(argument, schema, prefix) {
-      prefix = prefix || '';
+   testWithSchema: function testWithSchema(argument, schema) {
       if (schema.type === 'Object') {
-         return this.testObject(argument, schema.schema, prefix);
+         return this.testObject(argument, schema.schema);
       } else
       if (schema.type === 'Array') {
-         return this.filterArray(argument, schema, prefix)
+         return this.filterArray(argument, schema)
       } else {
-         return this.testType(argument, schema, prefix);
+         return this.testType(argument, schema);
       }
    },
-   test: function test(argument, prefix) {
+   test: function test(argument) {
       var schema = this.schema;
-      return this.testWithSchema(argument, schema, prefix);
+      return this.testWithSchema(argument, schema);
    }
 };
 
-var check = function(argument, schema, prefix) {
-   return prototype.testWithSchema(argument, schema, prefix);
+var check = function(argument, schema) {
+   return prototype.testWithSchema(argument, schema);
 };
 check.with = function(schema) {
-   var result = function(argument, prefix) {
-      return result.instance.test(argument, prefix);
+   var result = function(argument) {
+      return result.instance.test(argument);
    };
    result.instance = Object.create(prototype);
    result.instance.schema = schema;
