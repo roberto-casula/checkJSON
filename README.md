@@ -1,1 +1,3 @@
 # checkJS
+A JSON validator with schema and sanification(optional).
+_______________________________________________________________________________
