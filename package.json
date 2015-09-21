@@ -1,5 +1,5 @@
 {
-  "name": "checkJS",
+  "name": "check-js",
   "version": "0.0.1",
   "description": "a javascript schema validator with sanitization for objects and simple types",
   "main": "check.js",
