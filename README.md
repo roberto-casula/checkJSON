@@ -8,7 +8,10 @@ The validation is performed with a depth-first search on the schema object.
 **TODO:**
  - deep test for complexObjects (mixed type).
  - deep test for require flag.
- - a good method to change validate and sanitize functions.
+ - a good method to change/extends validate and sanitize functions.
+ - an adapter to use (validatorJS)[https://github.com/chriso/validator.js] as
+   withis validate function and provide the respective sanitize function
+   (with same types).
  - a decent README.
 
 **DONE:**
@@ -19,6 +22,7 @@ The validation is performed with a depth-first search on the schema object.
  - explore complex array (with object).
 
 **Promise for the next versions:**
+ - fixed length, minimal length and maximal legth for the Array type.
  - array with in array, aka matrix, should be described in the schema and
    explored.
  - provide a way to describe a multi typed array (needed?)
