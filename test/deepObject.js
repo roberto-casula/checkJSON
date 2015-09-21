@@ -124,7 +124,6 @@ describe("deepObject.js", function() {
                should.not.exists(result);
             })
             .catch(function(error) {
-               console.log(error)
                error.should.be.deep.equal(missingError);
             })
             .finally(done);
