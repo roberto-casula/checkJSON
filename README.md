@@ -6,10 +6,17 @@ _______________________________________________________________________________
 The validation is performed with a depth-first search on the schema object.
 
 **TODO:**
+ - deep test for complexObjects (mixed type).
+ - deep test for require flag.
+ - a good method to change validate and sanitize functions.
+ - a decent README.
+
+**DONE:**
+ - explore simple type.
+ - explore simple Object.
+ - explore Objects within an Object.
  - explore simple array (one level).
  - explore complex array (with object).
- - deep test for require flag.
- - a decent README.
 
 **Promise for the next versions:**
  - array with in array, aka matrix, should be described in the schema and
