@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "myrepo"
+    "url": "https://github.com/BobCaSUaL/checkJS"
   },
   "dependencies": {
     "bluebird": "^2.10.0",
