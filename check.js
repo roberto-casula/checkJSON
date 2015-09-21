@@ -98,12 +98,50 @@ var prototype = {
       return deferred.promise;
    },
 
+   testArray: function testObject(argument, schema) {
+      var deferred = Promise.defer();
+
+      process.nextTick(function() {
+         var promises, subSchema;
+         promises = [];
+         subSchema = schema.schema;
+
+         _.forEach(argument, function(value) {
+            promises.push(this.testWithSchema(value, subSchema));
+         }, this);
+
+         Promise.settle(promises).then(function(results) {
+            var reject = false,
+               vector = [],
+               errors = [];
+
+            _.forEach(results, function(result, i) {
+               if (!reject && result.isFulfilled()) {
+                  vector[i] = result.value();
+               } else
+               if (result.isRejected()) {
+                  reject = true;
+                  errors[i] = result.reason();
+               }
+            });
+            if (reject) {
+               return deferred.reject(errors)
+            } else {
+               return deferred.resolve(vector);
+            }
+         });
+
+      }.bind(this));
+
+      return deferred.promise;
+   },
+
    testWithSchema: function testWithSchema(argument, schema) {
       if (schema.type === 'Object') {
          return this.testObject(argument, schema.schema);
       } else
       if (schema.type === 'Array') {
-         return this.filterArray(argument, schema)
+         return this.testArray(argument, schema)
       } else {
          return this.testType(argument, schema);
       }
