@@ -6,8 +6,10 @@ var validator = require('validator');
 var prototype = {
 
    schema: null,
+   maxDeep: 128,
+   withRequired: true,
 
-   validate: function(value, schema) {
+   validate: function(value, schema, deep) {
       var type = _.capitalize(schema.type);
 
       if (type === "String") {
@@ -22,7 +24,7 @@ var prototype = {
          throw new Error('"' + type + '" is not recognized by the validate function"');
       }
    },
-   sanitize: function(value, schema) {
+   sanitize: function(value, schema, deep) {
       var type = _.capitalize(schema.type);
       if (type === "String") {
          return String(value);
@@ -36,11 +38,14 @@ var prototype = {
          throw new Error('"' + type + '" is not recognized by the sanitize function"');
       }
    },
-   testType: function testType(value, schema) {
+   testType: function testType(value, schema, deep) {
       var deferred = Promise.defer();
 
-      if (this.validate(value, schema)) {
-         deferred.resolve(this.sanitize(value, schema));
+      if (deep >= this.trimAtDeep) {
+         deferred.resolve(undefined);
+      } else
+      if (this.validate(value, schema, deep)) {
+         deferred.resolve(this.sanitize(value, schema, deep));
       } else {
          deferred.reject('should be a valid ' + schema.type);
       }
@@ -48,57 +53,65 @@ var prototype = {
       return deferred.promise;
    },
 
-   testObject: function testObject(argument, schema) {
+   testObject: function testObject(argument, schema, deep) {
       var deferred = Promise.defer();
+      var withRequired = this.withRequired;
 
       process.nextTick(function() {
          var promises = [],
             keys = [];
          _.forOwn(schema, function(subSchema, key) {
+
             var required, value;
-            required = subSchema.required !== false;
+            required = (subSchema.required !== false) && withRequired;
             value = argument[key];
-            keys.push(key);
 
             if (!_.isUndefined(value)) {
-               promises.push(this.testWithSchema(value, subSchema));
+               keys.push(key);
+               promises.push(this.testWithSchema(value, subSchema, deep + 1));
             } else
             if (required && _.isUndefined(value)) {
+               keys.push(key);
+               console.error(subSchema)
                promises.push(
                   Promise.reject('should exists and be a valid ' + subSchema.type)
                );
             }
          }, this);
 
-         Promise.settle(promises).then(function(results) {
-            var reject = false,
-               object = {},
-               errors = {};
+         if (promises.length > 0) {
+            Promise.settle(promises).then(function(results) {
+               var reject = false,
+                  object = {},
+                  errors = {};
 
-            _.forEach(results, function(result, i) {
-               var key = keys[i];
+               _.forEach(results, function(result, i) {
+                  var key = keys[i];
 
-               if (!reject && result.isFulfilled()) {
-                  object[key] = result.value();
-               } else
-               if (result.isRejected()) {
-                  reject = true;
-                  errors[key] = result.reason();
+                  if (!reject && result.isFulfilled()) {
+                     object[key] = result.value();
+                  } else
+                  if (result.isRejected()) {
+                     reject = true;
+                     errors[key] = result.reason();
+                  }
+               });
+               if (reject) {
+                  return deferred.reject(errors)
+               } else {
+                  return deferred.resolve(object);
                }
             });
-            if (reject) {
-               return deferred.reject(errors)
-            } else {
-               return deferred.resolve(object);
-            }
-         });
+         } else {
+            deferred.resolve({});
+         }
 
       }.bind(this));
 
       return deferred.promise;
    },
 
-   testArray: function testObject(argument, schema) {
+   testArray: function testObject(argument, schema, deep) {
       var deferred = Promise.defer();
 
       process.nextTick(function() {
@@ -107,7 +120,7 @@ var prototype = {
          subSchema = schema.schema;
 
          _.forEach(argument, function(value) {
-            promises.push(this.testWithSchema(value, subSchema));
+            promises.push(this.testWithSchema(value, subSchema, deep + 1));
          }, this);
 
          Promise.settle(promises).then(function(results) {
@@ -136,19 +149,19 @@ var prototype = {
       return deferred.promise;
    },
 
-   testWithSchema: function testWithSchema(argument, schema) {
+   testWithSchema: function testWithSchema(argument, schema, deep) {
       if (schema.type === 'Object') {
-         return this.testObject(argument, schema.schema);
+         return this.testObject(argument, schema.schema, deep);
       } else
       if (schema.type === 'Array') {
-         return this.testArray(argument, schema)
+         return this.testArray(argument, schema, deep)
       } else {
-         return this.testType(argument, schema);
+         return this.testType(argument, schema, deep);
       }
    },
    test: function test(argument) {
       var schema = this.schema;
-      return this.testWithSchema(argument, schema);
+      return this.testWithSchema(argument, schema, 0);
    }
 };
 
@@ -156,11 +169,23 @@ var check = function(argument, schema) {
    return prototype.testWithSchema(argument, schema);
 };
 check.with = function(schema) {
-   var result = function(argument) {
+   var result, checkObj;
+   checkObj = Object.create(prototype);
+   checkObj.schema = _.cloneDeep(schema);
+
+   //this function is an object with chain language
+   result = function(argument) {
       return result.instance.test(argument);
    };
-   result.instance = Object.create(prototype);
-   result.instance.schema = schema;
+   result.overrideRequired = function() {
+      checkObj.withRequired = false;
+      return result;
+   };
+   result.trimAtDeep = function(deep) {
+      checkObj.maxDeep = deep;
+      return result;
+   };
+   result.instance = checkObj;
    return result;
 };
 
