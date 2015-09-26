@@ -9,8 +9,7 @@ The validation is performed with a depth-first search on the schema object.
  - deep test for complexObjects (mixed type).
  - deep test for require flag.
  - a good method to change/extends validate and sanitize functions.
- - an adapter to use (validatorJS)[https://github.com/chriso/validator.js] as
-   withis validate function and provide the respective sanitize function
+ - an adapter to use (validatorJS)[https://github.com/chriso/validator.js] as validate function and provide the respective sanitize function
    (with same types).
  - remove lodash and validatorJS as mandadory dependencies.
  - a decent README.
