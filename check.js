@@ -41,9 +41,6 @@ var prototype = {
    testType: function testType(value, schema, deep) {
       var deferred = Promise.defer();
 
-      if (deep >= this.trimAtDeep) {
-         deferred.resolve(undefined);
-      } else
       if (this.validate(value, schema, deep)) {
          deferred.resolve(this.sanitize(value, schema, deep));
       } else {
@@ -66,13 +63,15 @@ var prototype = {
             required = (subSchema.required !== false) && withRequired;
             value = argument[key];
 
+            if( deep > this.maxDeep ) {
+               return;
+            } else
             if (!_.isUndefined(value)) {
                keys.push(key);
-               promises.push(this.testWithSchema(value, subSchema, deep + 1));
+               promises.push(this.testWithSchema(value, subSchema, deep));
             } else
             if (required && _.isUndefined(value)) {
                keys.push(key);
-               console.error(subSchema)
                promises.push(
                   Promise.reject('should exists and be a valid ' + subSchema.type)
                );
@@ -120,7 +119,7 @@ var prototype = {
          subSchema = schema.schema;
 
          _.forEach(argument, function(value) {
-            promises.push(this.testWithSchema(value, subSchema, deep + 1));
+            promises.push(this.testWithSchema(value, subSchema, deep));
          }, this);
 
          Promise.settle(promises).then(function(results) {
@@ -151,7 +150,7 @@ var prototype = {
 
    testWithSchema: function testWithSchema(argument, schema, deep) {
       if (schema.type === 'Object') {
-         return this.testObject(argument, schema.schema, deep);
+         return this.testObject(argument, schema.schema, deep + 1);
       } else
       if (schema.type === 'Array') {
          return this.testArray(argument, schema, deep)
