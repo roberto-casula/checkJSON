@@ -184,6 +184,19 @@ check.with = function(schema) {
       checkObj.maxDeep = deep;
       return result;
    };
+   result.use = function(what, func) {
+      if( what === 'validator' ) {
+         checkObj.validate = function(value, schema, deep){
+            return func(value, schema, deep, prototype.validate);
+         };
+      } else
+      if( what === 'sanitizer' ) {
+         checkObj.sanitize = function(value, schema, deep){
+            return func(value, schema, deep, prototype.sanitize);
+         };
+      }
+      return result;
+   };
    result.instance = checkObj;
    return result;
 };
