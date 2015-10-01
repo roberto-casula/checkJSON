@@ -9,6 +9,8 @@ The validation is performed with a depth-first search on the schema object.
 - deep test for complexObjects (mixed type).
 - deep test for require flag.
 - test for .use('validator'|'sanitizer', function)
+- test for the parse() function
+- test fot hidden fields
 - an adapter to use (validatorJS)[[https://github.com/chriso/validator.js](https://github.com/chriso/validator.js)] as validate function and provide the respective sanitize function
 - (with same types).
 - remove lodash as mandadory dependencies.
