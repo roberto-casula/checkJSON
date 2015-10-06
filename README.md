@@ -1,36 +1,73 @@
-# checkJS
-A JSON validator with schema and sanification(optional).
+# checkJSON
+A JSON validator with schema and sanification(optional). The validation is performed with a depth-first search on the schema object.
 
---------------------------------------------------------------------------------
+You can perform a check simply providing the object and the schema to CheckJS function:
 
-The validation is performed with a depth-first search on the schema object.
+```javascript
+var checkJSON = require('check-js');
+//
+var schema = {
+   "type": "Object",
+   "schema": {
+      "property1": {
+         "type": "String"
+      },
+      "property2": {
+         "type": "Number"
+      }
+   }
+};
+var myObject = {
+   "property1": "hello world",
+   "property2": "80085"
+}
+var sanitized = checkJSON(myObject, schema);
+console.log(sanitized);
+```
 
-**TODO:**
-- deep test for complexObjects (mixed type).
-- deep test for require flag.
-- test for .use('validator'|'sanitizer', function)
-- test for the parse() function
-- test fot hidden fields
-- an adapter to use (validatorJS)[[https://github.com/chriso/validator.js](https://github.com/chriso/validator.js)] as validate function and provide the respective sanitize function
-- (with same types).
-- remove lodash as mandadory dependencies.
-- remove validatorJS as mandadory dependencies.
-- a decent README.
+Or creating a checker instance then invoke it:
 
-**DONE:**
-- a good method to change/extends validate and sanitize functions (choosen the use() keyword).
-  - trim the object at a deep `checkJS.with(schema).trimAtDeep(deep);`
-  - override required with .overrideRequired();
-  - default all fielda are required.
-  - explore simple type.
-  - explore simple Object.
-  - explore Objects within an Object.
-  - explore simple array (one level).
-  - explore complex array (with object).
+```javascript
+var checkJSON = require('check-js');
+//
+var check = checkJSON.with({
+   "type": "Object",
+   "schema": {
+      "property1": {
+         "type": "String"
+      },
+      "property2": {
+         "type": "Number"
+      }
+   }
+});
+var myObject = {
+   "property1": "hello world",
+   "property2": "80085"
+}
+var sanitized = check(myObject, schema);
+console.log(sanitized);
+```
 
-**Promise for the next major versions:**
-- fixed length, minimal length and maximal legth for the Array type.
-- array with in array, aka matrix, should be described in the schema and
-- explored.
-- provide a way to describe a multi typed array (needed?)
-- recursive object definition, aka trees, should be described and explored.
+## The schema
+### what is a schema?
+A schema is a JSON object that recursively describes the class for the object that you have to check.
+
+The object footprint is the follow (where `|` means alternative):
+
+```javascript
+{
+   "type": "Object|Array|String|Number", // this is the data types
+   ""
+}
+```
+
+It's important for you undestanding that the schema is the input for the [validator](#The validator) and the [sanificator](#The sanificator).
+
+### default schema
+With the default schema you can check and sanitize the defaults javascript types
+
+### more types
+## The validator
+## The sanificator
+## Various
