@@ -1,32 +1,40 @@
 {
-  "name": "check-js",
-  "version": "0.0.4",
-  "description": "a javascript schema validator with sanitization for objects and simple types",
-  "main": "check.js",
-  "author": "Roberto CASULA",
-  "keywords": [
-    "schema validator",
-    "type check"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/BobCaSUaL/checkJS"
-  },
-  "dependencies": {
-    "bluebird": "^2.10.0",
-    "lodash": "^3.10.1",
-    "q": "^1.4.1"
-  },
-  "engines": {
-    "node": "*"
-  },
-  "scripts": {
-    "test": "make test"
-  },
-  "devDependencies": {
-    "chai": "^3.2.0",
-    "chai-as-promised": "^5.1.0",
-    "mocha": "^2.3.2",
-    "validator": "^4.0.6"
-  }
+	"name": "checkjson",
+	"version": "0.0.5",
+	"description": "a javascript schema validator with sanitization for objects and simple types",
+	"main": "check.js",
+	"author": "Roberto CASULA",
+	"keywords": [
+		"schema validator",
+		"type check"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/BobCaSUaL/checkJS.git"
+	},
+	"dependencies": {
+		"bluebird": "^2.10.0",
+		"lodash": "^3.10.1",
+		"q": "^1.4.1"
+	},
+	"engines": {
+		"node": "*"
+	},
+	"scripts": {
+		"test": "make test"
+	},
+	"devDependencies": {
+		"chai": "^3.2.0",
+		"chai-as-promised": "^5.1.0",
+		"mocha": "^2.3.2",
+		"validator": "^4.0.6"
+	},
+	"bugs": {
+		"url": "https://github.com/BobCaSUaL/checkJS/issues"
+	},
+	"homepage": "https://github.com/BobCaSUaL/checkJS#readme",
+	"directories": {
+		"test": "test"
+	},
+	"license": "GPL-3.0"
 }
