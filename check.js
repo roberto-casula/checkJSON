@@ -43,7 +43,7 @@ var prototype = {
 	/**
 	 * Return true if the (sub)Value will be checked and put in the sanitized object
 	 */
-	parse: function(value, subSchema, deep) {
+	sieve: function(value, subSchema, deep) {
 		return true;
 	},
 	testType: function testType(value, schema, deep) {
@@ -72,7 +72,7 @@ var prototype = {
 				value = argument[key];
 
 				if (!(subSchema.hidden === true && this.hideHidden)
-             && this.parse(value, subSchema, deep)) {
+             && this.sieve(value, subSchema, deep)) {
 					if (deep > this.maxDeep) {
 						return;
 					} else
@@ -206,9 +206,9 @@ check.with = function(schema) {
 				return func(value, schema, deep, prototype.sanitize);
 			};
 		} else
-		if (what === 'parse') {
-			checkObj.parse = function(value, schema, deep) {
-				return func(value, schema, deep, prototype.parse);
+		if (what === 'sieve') {
+			checkObj.sieve = function(value, schema, deep) {
+				return func(value, schema, deep, prototype.sieve);
 			};
 		}
 		return result;
