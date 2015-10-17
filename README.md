@@ -86,6 +86,46 @@ with the required `"schema"` property.
 
 It's important for you undestanding that the schema is the input for the [validator](#The validator) and the [sanificator](#The sanificator).
 
+### Schema Keys as Regular Expression
+You can also describe an Object-Schema field with a regular expression (RegExp).
+In this case checkJSON will perform a search in the entire (sub)Object for the specified object.
+
+You can pass the regular expression with a string starting with "/",
+checkJSON will automatically recognize that is a regular expression than will perform the check.
+
+*Make attention that all the regular-expression keys are **never required**
+and if a required property is set it will be ignored.*
+
+exempli grazia I can check for an object that has zero or more fields with the
+keyword `id_` followed by a mongodb id.
+```javascript
+var checkJSON = require('checkJSON');
+
+var check = checkJSON.with({
+   "type": "Object",
+   "schema": {
+      "/^id_(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i": {
+         "type": "Object"
+         "schema": {
+            "foo": {
+               "type": "String"
+            }
+         }
+      }
+   }
+})
+
+var object = {
+   "id_55f7ec6b584fc8632af44d5d": {
+      "foo": "fooz"
+   },
+   "id_561655d60f5d4e9f6c254ab8": {
+      "foo": "bar"
+   }
+};
+console.log(check(object));
+```
+
 ### Default
 With the default configuration you can distinguish validate and sanitize:
 

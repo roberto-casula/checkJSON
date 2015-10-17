@@ -41,7 +41,7 @@ var prototype = {
 
 	/**
 	 * Return true if the (sub)Value will be checked and put in the sanitized object
-    * The default sieve is used to check for hidden fields.
+	 * The default sieve is used to check for hidden fields.
 	 */
 	sieve: function(value, subSchema, deep) {
 		return subSchema.hidden !== true && deep <= this.maxDeep;
@@ -58,32 +58,69 @@ var prototype = {
 		return deferred.promise;
 	},
 
+	_testObjectStringKey: function(argument, schema, deep) {
+		var withRequired = this.withRequired;
+		var promises = [],
+			keys = [];
+		_.forOwn(schema, function(subSchema, key) {
+
+			var required, value;
+			required = (subSchema.required !== false) && withRequired;
+			value = argument[key];
+
+			if (this.sieve(value, subSchema, deep)) {
+				if (!_.isUndefined(value)) {
+					keys.push(key);
+					promises.push(this.testWithSchema(value, subSchema, deep));
+				} else
+				if (required && _.isUndefined(value)) {
+					keys.push(key);
+					promises.push(
+						Promise.reject('should exists and be a valid ' + subSchema.type)
+					);
+				}
+			}
+		}, this);
+		return [keys, promises];
+	},
+
+	_testObjectRegExpKey: function(argument, schema, deep) {
+		var withRequired = this.withRequired;
+		var promises = [],
+			keys = [];
+		_.forOwn(schema, function(subSchema, regExpKey) {
+			var regExp = new RegExp(regExpKey);
+			_.forOwn(argument, function(value, key) {
+				if( regExp.test(key) ) {
+					//if the test is sussesfull I assume that the value is not undefined
+					keys.push(key);
+					promises.push(this.testWithSchema(value, subSchema, deep));
+				}
+			})
+		}, this);
+		return [keys, promises];
+	},
 	testObject: function testObject(argument, schema, deep) {
 		var deferred = Promise.defer();
-		var withRequired = this.withRequired;
+
+		var schemaStringKey = {};
+		var schemaRegExpKey = {};
+
+		_.forOwn(schema, function(subSchema, key) {
+			if('/' === key.charAt(0)) {
+				schemaRegExpKey[key] = subSchema;
+			} else {
+				schemaStringKey[key] = subSchema;
+			}
+		});
 
 		process.nextTick(function() {
-			var promises = [],
-				keys = [];
-			_.forOwn(schema, function(subSchema, key) {
 
-				var required, value;
-				required = (subSchema.required !== false) && withRequired;
-				value = argument[key];
+			var keysPromisesStringKey = this._testObjectStringKey(argument, schemaStringKey, deep);
+			var keysPromisesReqExpKey = this._testObjectRegExpKey(argument, schemaRegExpKey, deep);
 
-				if (this.sieve(value, subSchema, deep)) {
-					if (!_.isUndefined(value)) {
-						keys.push(key);
-						promises.push(this.testWithSchema(value, subSchema, deep));
-					} else
-					if (required && _.isUndefined(value)) {
-						keys.push(key);
-						promises.push(
-							Promise.reject('should exists and be a valid ' + subSchema.type)
-						);
-					}
-				}
-			}, this);
+			var keys = keysPromisesStringKey[0].concat(keysPromisesReqExpKey[0]);
+			var promises = keysPromisesStringKey[1].concat(keysPromisesReqExpKey[1]);
 
 			if (promises.length > 0) {
 				Promise.settle(promises).then(function(results) {
