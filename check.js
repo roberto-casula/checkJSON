@@ -7,7 +7,6 @@ var prototype = {
 
 	schema: null,
 	maxDeep: 128,
-	hideHidden: true,
 	withRequired: true,
 
 	validate: function(value, schema, deep) {
@@ -42,9 +41,10 @@ var prototype = {
 
 	/**
 	 * Return true if the (sub)Value will be checked and put in the sanitized object
+    * The default sieve is used to check for hidden fields.
 	 */
 	sieve: function(value, subSchema, deep) {
-		return true;
+		return subSchema.hidden !== true && deep <= this.maxDeep;
 	},
 	testType: function testType(value, schema, deep) {
 		var deferred = Promise.defer();
@@ -71,11 +71,7 @@ var prototype = {
 				required = (subSchema.required !== false) && withRequired;
 				value = argument[key];
 
-				if (!(subSchema.hidden === true && this.hideHidden)
-             && this.sieve(value, subSchema, deep)) {
-					if (deep > this.maxDeep) {
-						return;
-					} else
+				if (this.sieve(value, subSchema, deep)) {
 					if (!_.isUndefined(value)) {
 						keys.push(key);
 						promises.push(this.testWithSchema(value, subSchema, deep));

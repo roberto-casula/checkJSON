@@ -123,4 +123,23 @@ checkString("Hello World!").then(function(sanified) {
 ### extends the schema footprint
 ## The validator
 ## The sanificator
+## The sieve
+The sieve() function is the provided interface to decide if a subfield should be
+passed to the validator and then to the sanificator.
+The default sieve is:
+```javascript
+/**
+* Return true if the (sub)Value will be checked and put in the sanitized object
+* The default sieve is used to check for hidden fields.
+*/
+sieve: function(value, subSchema, deep) {
+   return subSchema.hidden !== true && deep <= this.maxDeep;
+},
+```
+It means that the considered subfield should be validate and then put in the
+sanitized result only if the hidden value of the schema is not equal to true and
+if the current deep is not less than or equal to the maxDeep.
+
+You can replace the sieve function with ```check.use('sieve', func(value, schema, deep, defaultSieve))```
+
 ## Various

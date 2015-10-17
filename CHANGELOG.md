@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
 
 **TODO:**
+- regular expression for object key.
 - deep test for complexObjects (mixed type).
 - deep test for require flag.
 - test for .use('validator'|'sanitizer', function)
@@ -13,7 +14,9 @@
 - a decent README.
 
 **DONE:**
-- a good method to change/extends validate and sanitize functions (choosen the use() keyword).
+  - moved the deep check into the sieve function.
+  - moved the hidden check in the default sieve() function.
+  - a good method to change/extends validate and sanitize functions (choosen the use() keyword).
   - trim the object at a deep `checkJS.with(schema).trimAtDeep(deep);`
   - override required with .overrideRequired();
   - default all fielda are required.
