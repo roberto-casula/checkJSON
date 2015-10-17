@@ -21,8 +21,13 @@ var myObject = {
    "property1": "hello world",
    "property2": "80085"
 }
-var sanitized = checkJSON(myObject, schema);
-console.log(sanitized);
+checkJSON(myObject, schema)
+   .then(function(sanitized) {
+      console.log(sanitized);
+   })
+   .catch(function(err){
+      throw err;
+   });
 ```
 
 Or creating a checker instance then invoke it:
@@ -45,29 +50,77 @@ var myObject = {
    "property1": "hello world",
    "property2": "80085"
 }
-var sanitized = check(myObject, schema);
-console.log(sanitized);
+checkJSON(myObject, schema)
+   .then(function(sanitized) {
+      console.log(sanitized);
+   })
+   .catch(function(err){
+      throw err;
+   });
 ```
 
 ## The schema
 ### what is a schema?
 A schema is a JSON object that recursively describes the class for the object that you have to check.
 
-The object footprint is the follow (where `|` means alternative):
+The schema object footprint is the follow (where `|` means alternative):
 
 ```javascript
 {
-   "type": "Object|Array|String|Number", // this is the data types
-   ""
+   // this is the data types
+   "type": "Object|Array|String|Number",
+   //is the field required to continue the validation?, default true
+   "required": true|false,
+
+   //only if the type is Object, this field will trim the subObject, default false
+   "hidden": true|false,
+    //only if Object or Array here you should specify the shubSchema
+   "schema": {schemaObject},
+
+   //the description of the field
+   "description": "this is a string"
 }
 ```
+please note that the schemaObject of an Object or an Array is recursively defined
+with the required `"schema"` property.
 
 It's important for you undestanding that the schema is the input for the [validator](#The validator) and the [sanificator](#The sanificator).
 
-### default schema
-With the default schema you can check and sanitize the defaults javascript types
+### Default
+With the default configuration you can distinguish validate and sanitize:
 
-### more types
+#### single variables:
+
+```javascript
+var checkJSON = require('checkJSON');
+
+var checkBool = checkJSON.with({
+ "type": "Boolean"
+});
+var checkNumber = checkJSON.with({
+ "type": "Number"
+});
+var checkString = checkJSON.with({
+ "type": "String"
+});
+
+checkBool('true').then(function(sanified) {
+   console.log(typeof sanified);
+   console.log(sanified);
+});
+checkNumber('455.538').then(function(sanified) {
+   console.log(typeof sanified);
+   console.log(sanified);
+});
+checkString("Hello World!").then(function(sanified) {
+   console.log(typeof sanified);
+   console.log(sanified);
+});
+```
+
+#### Objects
+#### Arrays
+### extends the schema footprint
 ## The validator
 ## The sanificator
 ## Various

@@ -7,7 +7,7 @@
 - test for the parse() function
 - test fot hidden fields
 - an adapter to use (validatorJS)[[https://github.com/chriso/validator.js](https://github.com/chriso/validator.js)] as validate function and provide the respective sanitize function
-- (with same types).
+- (with same types).schema
 - remove lodash as mandadory dependencies.
 - remove validatorJS as mandadory dependencies.
 - a decent README.
