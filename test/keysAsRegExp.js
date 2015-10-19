@@ -6,11 +6,11 @@ chai.use(chaiAsPromised);
 
 var checkJSON = require('../');
 
-describe("simpleObject.js", function() {
+describe("keysAsRegExp.js", function() {
    var check = checkJSON.with({
       "type": "Object",
       "schema": {
-         "/^id_(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i": {
+         "^id_[a-f0-9]{24}$": {
             "type": "Object",
             "schema": {
                "foo": {
@@ -19,7 +19,29 @@ describe("simpleObject.js", function() {
             }
          }
       }
-   })
+   });
+   var checkMixed = checkJSON.with({
+      "type": "Object",
+      "schema": {
+         "^id_[a-f0-9]{24}$": {
+            "type": "Object",
+            "schema": {
+               "foo": {
+                  "type": "Number"
+               }
+            }
+         },
+         "string": {
+            type: "String"
+         },
+         "number": {
+            "type": "Number"
+         },
+         "boolean": {
+            "type": "Boolean"
+         }
+      }
+   });
 
    var mainObject = {
       "id_55f7ec6b584fc8632af44d5d": {
@@ -29,7 +51,17 @@ describe("simpleObject.js", function() {
          "foo": "4090985"
       }
    };
-   var mainObject = {
+   var tooManyKeys = {
+      "id_55f7ec6b584fc8632af44d5d": {
+         "foo": "1093175"
+      },
+      "id_561655d60f5d4e9f6c254ab8": {
+         "foo": "4090985"
+      },
+      "otherKey": "otherWalue"
+   };
+
+   var sanitizedObject = {
       "id_55f7ec6b584fc8632af44d5d": {
          "foo": Number("1093175")
       },
@@ -38,23 +70,28 @@ describe("simpleObject.js", function() {
       }
    };
 
-   var tooManyKeys = {
+   var mixed = {
+      "id_55f7ec6b584fc8632af44d5d": {
+         "foo": Number("1093175")
+      },
+      "id_561655d60f5d4e9f6c254ab8": {
+         "foo": Number("4090985")
+      },
       "string": "hello world",
       "number": "123.456",
       "boolean": "false",
       "otherKey": "otherWalue"
    };
-   var missingKey = {
-      "string": "hello world",
-      "boolean": "false"
-   };
-   var missingError = {
-      "number": "should exists and be a valid Number"
-   };
-   var invalidObject = {
-      "string": "hello world",
-      "number": "hello world",
-      "boolean": "hello world"
+   var sanitizedMixed = {
+      "id_55f7ec6b584fc8632af44d5d": {
+         "foo": Number("1093175")
+      },
+      "id_561655d60f5d4e9f6c254ab8": {
+         "foo": Number("4090985")
+      },
+      "string": String("hello world"),
+      "number": Number("123.456"),
+      "boolean": Boolean("false"),
    };
 
    before(function(done) {
@@ -75,25 +112,10 @@ describe("simpleObject.js", function() {
             .should.be.fulfilled
             .notify(done);
       });
-      it('should reject an object with missingKey', function(done) {
-         check(missingKey)
-            .should.be.rejected
+      it('should validate a mixed object (keys as String and keys ad RegExp)', function(done) {
+         checkMixed(mixed)
+            .should.be.fulfilled
             .notify(done);
-      });
-      it('should reject an object that is not well formed', function(done) {
-         check(invalidObject)
-            .should.be.rejected
-            .notify(done);
-      });
-      it('should return the expected error', function(done) {
-         check(missingKey)
-            .then(function(result) {
-               should.not.exists(result);
-            })
-            .catch(function(error) {
-               error.should.be.deep.equal(missingError);
-            })
-            .finally( done );
       });
    });
 
@@ -106,6 +128,11 @@ describe("simpleObject.js", function() {
       it('should sanitize an object with too many keys', function(done) {
          check(tooManyKeys)
             .should.become(sanitizedObject)
+            .notify(done);
+      });
+      it('should sanitize a mixed object (keys as String and keys ad RegExp)', function(done) {
+         checkMixed(mixed)
+            .should.become(sanitizedMixed)
             .notify(done);
       });
    });

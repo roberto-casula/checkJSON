@@ -90,7 +90,7 @@ It's important for you undestanding that the schema is the input for the [valida
 You can also describe an Object-Schema field with a regular expression (RegExp).
 In this case checkJSON will perform a search in the entire (sub)Object for the specified object.
 
-You can pass the regular expression with a string starting with "/",
+You can pass the regular expression with a string that starts with `^` and ends with `$`,
 checkJSON will automatically recognize that is a regular expression than will perform the check.
 
 *Make attention that all the regular-expression keys are **never required**
@@ -104,7 +104,7 @@ var checkJSON = require('checkJSON');
 var check = checkJSON.with({
    "type": "Object",
    "schema": {
-      "/^id_(?=[a-f\d]{24}$)(\d+[a-f]|[a-f]+\d)/i": {
+      "^id_[a-f0-9]{24}$": {
          "type": "Object"
          "schema": {
             "foo": {

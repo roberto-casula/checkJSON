@@ -1,7 +1,6 @@
 --------------------------------------------------------------------------------
 
 **TODO:**
-- regular expression for object key.
 - deep test for complexObjects (mixed type).
 - deep test for require flag.
 - test for .use('validator'|'sanitizer', function)
@@ -14,6 +13,7 @@
 - a decent README.
 
 **DONE:**
+  - regular expression for object key.
   - moved the deep check into the sieve function.
   - moved the hidden check in the default sieve() function.
   - a good method to change/extends validate and sanitize functions (choosen the use() keyword).
