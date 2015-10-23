@@ -9,33 +9,59 @@ var prototype = {
    maxDeep: 128,
    withRequired: true,
 
-   validate: function(value, schema, deep) {
-      var type = _.capitalize(schema.type);
+   types: {
+      'String': {
+         validate: function(value, schema) {
+            return _.isString(value);
+         },
+         sanitize: function(value, schema) {
+            return String(value);
+         }
+      },
+      'Number': {
+         validate: function(value, schema) {
+            return validator.isDecimal(value);
+         },
+         sanitize: function(value, schema) {
+            return Number(value);
+         }
+      },
+      'Boolean': {
+         validate: function(value, schema) {
+            return validator.isBoolean(value);
+         },
+         sanitize: function(value, schema) {
+            return Boolean(value);
+         }
+      }
+   },
 
-      if (type === "String") {
-         return _.isString(value);
-      } else
-      if (type === "Number") {
-         return validator.isDecimal(value);
-      } else
-      if (type === "Boolean") {
-         return validator.isBoolean(value);
-      } else {
+   validate: function(value, schema, deep) {
+
+      //I get the object that describe the requested type also if it is undefined
+      var type = this.types[_.capitalize(schema.type)];
+
+      if (undefined === type || null === type) {
          throw new Error('"' + type + '" is not recognized by the validate function"');
+      } else
+      if ( 'function' !== typeof type.validate ) {
+         throw new Error('no validate function found for the type "' + type + '"');
+      } else {
+         return type.validate(value, schema);
       }
    },
    sanitize: function(value, schema, deep) {
-      var type = _.capitalize(schema.type);
-      if (type === "String") {
-         return String(value);
+
+      //I get the object that describe the requested type also if it is undefined
+      var type = this.types[_.capitalize(schema.type)];
+
+      if (undefined === type || null === type) {
+         throw new Error('"' + type + '" is not recognized by the validate function"');
       } else
-      if (type === "Number") {
-         return Number(value);
-      } else
-      if (type === "Boolean") {
-         return Boolean(value);
+      if ( 'function' !== typeof type.sanitize ) {
+         throw new Error('no sanitize function found for the type "' + type + '"');
       } else {
-         throw new Error('"' + type + '" is not recognized by the sanitize function"');
+         return type.sanitize(value, schema);
       }
    },
 
@@ -210,6 +236,21 @@ var prototype = {
 
 var check = function(argument, schema) {
    return prototype.testWithSchema(argument, schema);
+};
+check.useType = function(name, definition, force){
+   name = _.capitalize(name);
+   force = force || false;
+   if(prototype.types[name] && !force) {
+      throw new Error('type "'+name+'" already in use');
+   } else
+   if('function' !== typeof(definition.validate)) {
+      throw new Error('validate function missing for type "'+name+'"')
+   } else
+   if('function' !== typeof(definition.sanitize)) {
+      throw new Error('sanitize function missing for type "'+name+'"')
+   } else {
+      prototype.types[name] = definition;
+   }
 };
 check.with = function(schema) {
    var result, checkObj;

@@ -7,12 +7,12 @@
 - test for the parse() function
 - test fot hidden fields
 - an adapter to use (validatorJS)[[https://github.com/chriso/validator.js](https://github.com/chriso/validator.js)] as validate function and provide the respective sanitize function
-- (with same types).schema
 - remove lodash as mandadory dependencies.
 - remove validatorJS as mandadory dependencies.
 - a decent README.
 
 **DONE:**
+  - check.useType(name, description) for plug data types statically.
   - regular expression for object key.
   - moved the deep check into the sieve function.
   - moved the hidden check in the default sieve() function.

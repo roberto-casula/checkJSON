@@ -4,7 +4,7 @@ A JSON validator with schema and sanification(optional). The validation is perfo
 You can perform a check simply providing the object and the schema to CheckJS function:
 
 ```javascript
-var checkJSON = require('check-js');
+var checkJSON = require('checkjson');
 //
 var schema = {
    "type": "Object",
@@ -33,7 +33,7 @@ checkJSON(myObject, schema)
 Or creating a checker instance then invoke it:
 
 ```javascript
-var checkJSON = require('check-js');
+var checkJSON = require('checkjson');
 //
 var check = checkJSON.with({
    "type": "Object",
@@ -99,7 +99,7 @@ and if a required property is set it will be ignored.*
 exempli grazia I can check for an object that has zero or more fields with the
 keyword `id_` followed by a mongodb id.
 ```javascript
-var checkJSON = require('checkJSON');
+var checkJSON = require('checkjson');
 
 var check = checkJSON.with({
    "type": "Object",
@@ -132,7 +132,7 @@ With the default configuration you can distinguish validate and sanitize:
 #### single variables:
 
 ```javascript
-var checkJSON = require('checkJSON');
+var checkJSON = require('checkjson');
 
 var checkBool = checkJSON.with({
  "type": "Boolean"
@@ -161,6 +161,23 @@ checkString("Hello World!").then(function(sanified) {
 #### Objects
 #### Arrays
 ### extends the schema footprint
+You can add user defined types simply using `checkJSON.useType(name, description)`.
+exempli gratia:
+```javascript
+checkJSON.useType('TestTypeWithSchema', {
+   validate: function(value, schema) {
+      return schema.type === 'TestTypeWithSchema' && schema.property === 'testProperty';
+   },
+   sanitize: function(value, schema) {
+      return 'sanitized';
+   }
+});
+```
+As you can see, the description object should have both validate and sanitize function.
+Those funtion are called directly by the default validator and sanificator and boht
+receive 2 arguments: the value received (that is the leaf of the checking object)
+and the schema that this value should respect (that is the leaf of the schema object).
+
 ## The validator
 ## The sanificator
 ## The sieve
