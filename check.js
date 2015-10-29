@@ -44,7 +44,7 @@ var prototype = {
       if (undefined === type || null === type) {
          throw new Error('"' + type + '" is not recognized by the validate function"');
       } else
-      if ( 'function' !== typeof type.validate ) {
+      if ('function' !== typeof type.validate) {
          throw new Error('no validate function found for the type "' + type + '"');
       } else {
          return type.validate(value, schema);
@@ -58,7 +58,7 @@ var prototype = {
       if (undefined === type || null === type) {
          throw new Error('"' + type + '" is not recognized by the validate function"');
       } else
-      if ( 'function' !== typeof type.sanitize ) {
+      if ('function' !== typeof type.sanitize) {
          throw new Error('no sanitize function found for the type "' + type + '"');
       } else {
          return type.sanitize(value, schema);
@@ -75,10 +75,14 @@ var prototype = {
    testType: function testType(value, schema, deep) {
       var deferred = Promise.defer();
 
-      if (this.validate(value, schema, deep)) {
-         deferred.resolve(this.sanitize(value, schema, deep));
-      } else {
-         deferred.reject('should be a valid ' + schema.type);
+      try {
+         if (this.validate(value, schema, deep)) {
+            deferred.resolve(this.sanitize(value, schema, deep));
+         } else {
+            deferred.reject('should be a valid ' + schema.type);
+         }
+      } catch(err) {
+         deferred.reject(err.message);
       }
 
       return deferred.promise;
@@ -237,17 +241,17 @@ var prototype = {
 var check = function(argument, schema) {
    return prototype.testWithSchema(argument, schema);
 };
-check.useType = function(name, definition, force){
+check.useType = function(name, definition, force) {
    name = _.capitalize(name);
    force = force || false;
-   if(prototype.types[name] && !force) {
-      throw new Error('type "'+name+'" already in use');
+   if (prototype.types[name] && !force) {
+      throw new Error('type "' + name + '" already in use');
    } else
-   if('function' !== typeof(definition.validate)) {
-      throw new Error('validate function missing for type "'+name+'"')
+   if ('function' !== typeof(definition.validate)) {
+      throw new Error('validate function missing for type "' + name + '"')
    } else
-   if('function' !== typeof(definition.sanitize)) {
-      throw new Error('sanitize function missing for type "'+name+'"')
+   if ('function' !== typeof(definition.sanitize)) {
+      throw new Error('sanitize function missing for type "' + name + '"')
    } else {
       prototype.types[name] = definition;
    }

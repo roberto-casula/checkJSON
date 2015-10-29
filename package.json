@@ -1,6 +1,6 @@
 {
 	"name": "checkjson",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"description": "a javascript schema validator with sanitization for objects and simple types",
 	"main": "check.js",
 	"author": "Roberto CASULA",

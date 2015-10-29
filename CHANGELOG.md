@@ -12,6 +12,7 @@
 - a decent README.
 
 **DONE:**
+  - permits to user defined types to throws exception.
   - check.useType(name, description) for plug data types statically.
   - regular expression for object key.
   - moved the deep check into the sieve function.
