@@ -97,7 +97,8 @@ var prototype = {
       _.forOwn(schema, function(subSchema, key) {
 
          var required, value;
-         required = (subSchema.required !== false) && withRequired;
+
+         required = (subSchema.required || false) && withRequired;
          value = argument[key];
 
          if (this.sieve(value, subSchema, deep)) {
