@@ -39,29 +39,31 @@ var prototype = {
    validate: function(value, schema, deep) {
 
       //I get the object that describe the requested type also if it is undefined
-      var type = this.types[_.capitalize(schema.type)];
-
-      if (undefined === type || null === type) {
-         throw new Error('"' + type + '" is not recognized by the validate function"');
-      } else
-      if ('function' !== typeof type.validate) {
-         throw new Error('no validate function found for the type "' + type + '"');
+      if (undefined === schema.type || null === schema.type) {
+         throw new Error('"property type is not defined"');
       } else {
-         return type.validate(value, schema);
+         var type = this.types[_.capitalize(schema.type)];
+
+         if ('function' !== typeof type.validate) {
+            throw new Error('no validate function found for the type "' + type + '"');
+         } else {
+            return type.validate(value, schema);
+         }
       }
    },
    sanitize: function(value, schema, deep) {
 
       //I get the object that describe the requested type also if it is undefined
-      var type = this.types[_.capitalize(schema.type)];
-
-      if (undefined === type || null === type) {
-         throw new Error('"' + type + '" is not recognized by the validate function"');
-      } else
-      if ('function' !== typeof type.sanitize) {
-         throw new Error('no sanitize function found for the type "' + type + '"');
+      if (undefined === schema.type || null === schema.type) {
+         throw new Error('"property type is not defined"');
       } else {
-         return type.sanitize(value, schema);
+         var type = this.types[_.capitalize(schema.type)];
+
+         if ('function' !== typeof type.sanitize) {
+            throw new Error('no sanitize function found for the type "' + type + '"');
+         } else {
+            return type.sanitize(value, schema);
+         }
       }
    },
 
@@ -81,7 +83,7 @@ var prototype = {
          } else {
             deferred.reject('should be a valid ' + schema.type);
          }
-      } catch(err) {
+      } catch (err) {
          deferred.reject(err.message);
       }
 
